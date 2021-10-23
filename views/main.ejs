@@ -1,0 +1,115 @@
+<html dir="rtl">
+<meta charset="utf-8 " dir="rtl" />
+<meta content='width=device-width, initial-scale=1' name='viewport' />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<h1>ניהול על שבבים:</h1>
+
+</html>
+
+<div id="statusTable">
+</div>
+
+
+<br>
+<br>
+
+<div id="action">
+</div>
+
+<script>
+    reloadTable()
+
+    function action(url) {
+        fetch(url + '?systemCode=<%=sysCode%>');
+        reloadTable()
+        document.getElementById('action').innerHTML = '<b> הפעולה בוצעה </b>';
+        setTimeout(() => {
+            document.getElementById('action').innerHTML = ''
+        }, 500)
+    }
+
+    function reloadTable() {
+        fetch('/getOriginalStatus?systemCode=<%=sysCode%>')
+            .then(res => res.json())
+            .then((data) => {
+                var status = data
+                var table_body = `<table>
+        <thead>
+            <tr>
+                <th>שבב</th>
+                <th>מצב</th>
+                <th>פעולות</th>
+            </tr>
+        </thead>`;
+
+                for (var i = 0; i < status.length; i++) {
+                    //console.log(status[i])
+                    if (i < 3 || i == status.length - 1) {
+                        continue;
+                    }
+                    myI = i - 2
+
+                    table_body += `
+            <tr>
+                <td>
+                    #${myI}
+                </td>
+                <td>
+                    ${status[i] == 1 ? 'פועל' : "כבוי"}
+                </td>
+                <td>
+                    <button ${status[i] == 1 ? 'disabled' : ""} onclick="action('/onChip/${myI}')"> הפעלה </button>
+                    <button ${status[i] == 1 ? '' : "disabled"} onclick="action('/offChip/${myI}')"> כיבוי </button>
+                    <button ${status[i] == 1 ? 'disabled' : ""} onclick="action('/delayChip/${myI}/5')"> הפעל ל5 שניות </button>
+                </td>
+            </tr>`
+                }
+
+                table_body += `</table>`
+
+
+                table_body += '</tbody></table>';
+                document.getElementById('statusTable').innerHTML = table_body;
+            })
+    }
+
+    setInterval(() => {
+        reloadTable()
+    }, 1000);
+</script>
+
+<style>
+    thead,
+    tfoot {
+        background-color: #3f87a6;
+        color: #fff;
+    }
+    
+    tbody {
+        background-color: #e4f0f5;
+    }
+    
+    caption {
+        padding: 10px;
+        caption-side: bottom;
+    }
+    
+    table {
+        border-collapse: collapse;
+        border: 2px solid rgb(200, 200, 200);
+        letter-spacing: 1px;
+        font-family: sans-serif;
+        font-size: .8rem;
+    }
+    
+    td,
+    th {
+        border: 1px solid rgb(190, 190, 190);
+        padding: 5px 10px;
+    }
+    
+    td {
+        text-align: center;
+    }
+</style>
