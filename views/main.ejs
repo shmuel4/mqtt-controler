@@ -3,33 +3,57 @@
 <meta content='width=device-width, initial-scale=1' name='viewport' />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<h1>ניהול על שבבים:</h1>
+<title>מרוחק::
+    <%=title%>
+</title>
+<h1>ניהול מרוחק של ערוצים:
+    <%=title%>
+</h1>
 
 </html>
 
 <div id="statusTable">
+    <h1> מעלה נתונים מהתתקן:...</h1>
 </div>
 
 
-<br>
 <br>
 
 <div id="action">
 </div>
 
 <script>
-    reloadTable()
+    let config
+    setTimeout(() => {
+        reloadTable()
+    }, 10);
 
     function action(url) {
-        fetch(url + '?systemCode=<%=sysCode%>');
+        fetch(url + '?systemCode=<%=sysCode%>').then((data) => {
+            if (data.status == 200) {
+                document.getElementById('action').innerHTML = `<b style="color:green;"> הושלם </b>`;
+                setTimeout(() => {
+                    document.getElementById('action').innerHTML = ''
+                }, 1000)
+            } else {
+                document.getElementById('action').innerHTML = `<b style="color:red;"> שגיאה ${data.status} - ${data.body}</b>`;
+                setTimeout(() => {
+                    document.getElementById('action').innerHTML = ''
+                }, 1500)
+            }
+        });
         reloadTable()
-        document.getElementById('action').innerHTML = '<b> הפעולה בוצעה </b>';
-        setTimeout(() => {
-            document.getElementById('action').innerHTML = ''
-        }, 500)
+        document.getElementById('action').innerHTML = '<h> בביצוע... </h>';
     }
 
     function reloadTable() {
+
+        fetch('/getChannels?systemCode=<%=sysCode%>')
+            .then(res => res.json())
+            .then((data) => {
+                config = data
+            })
+
         fetch('/getOriginalStatus?systemCode=<%=sysCode%>')
             .then(res => res.json())
             .then((data) => {
@@ -37,33 +61,52 @@
                 var table_body = `<table>
         <thead>
             <tr>
-                <th>שבב</th>
+                <th>ערוץ</th>
                 <th>מצב</th>
                 <th>פעולות</th>
             </tr>
         </thead>`;
-
                 for (var i = 0; i < status.length; i++) {
-                    //console.log(status[i])
                     if (i < 3 || i == status.length - 1) {
                         continue;
                     }
-                    myI = i - 2
+                    let myI = i - 2
+                    let configI = myI - 1
 
                     table_body += `
             <tr>
                 <td>
-                    #${myI}
+                    # ${config[configI].name ? config[configI].name: myI}
                 </td>
                 <td>
                     ${status[i] == 1 ? 'פועל' : "כבוי"}
                 </td>
-                <td>
-                    <button ${status[i] == 1 ? 'disabled' : ""} onclick="action('/onChip/${myI}')"> הפעלה </button>
-                    <button ${status[i] == 1 ? '' : "disabled"} onclick="action('/offChip/${myI}')"> כיבוי </button>
-                    <button ${status[i] == 1 ? 'disabled' : ""} onclick="action('/delayChip/${myI}/5')"> הפעל ל5 שניות </button>
-                </td>
-            </tr>`
+                <td>`
+                    if (typeof config[configI].actions === "string") {
+                        switch (config[configI].actions) {
+                            case 'all':
+                                table_body += `
+                                    <button ${status[i] == 1 ? 'disabled' : ""} onclick="action('/onChip/${myI}')"> הפעלה </button>
+                                    <button ${status[i] == 1 ? '' : "disabled"} onclick="action('/offChip/${myI}')"> כיבוי </button>
+                                    <button ${status[i] == 1 ? 'disabled' : ""} onclick="action('/delayChip/${myI}/5')"> הפעל ל5 שניות </button>`
+                            default:
+                        }
+                    } else {
+                        config[configI].actions.forEach(action => {
+                            switch (action) {
+                                case 'on':
+                                    table_body += `<button ${status[i] == 1 ? 'disabled' : ""} onclick="action('/onChip/${myI}')"> הפעלה </button>\n`
+                                    break
+                                case 'off':
+                                    table_body += `<button ${status[i] == 1 ? '' : "disabled"} onclick="action('/offChip/${myI}')"> כיבוי </button>\n`
+                                    break
+                                case 'delay':
+                                    table_body += `<button ${status[i] == 1 ? 'disabled' : ""} onclick="action('/delayChip/${myI}/5')"> הפעל ל5 שניות </button>\n`
+                                    break
+                            }
+                        });
+                    }
+                    table_body += `</td></tr>`
                 }
 
                 table_body += `</table>`

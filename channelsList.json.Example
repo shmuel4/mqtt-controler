@@ -1,0 +1,56 @@
+{
+    "title": "חדר 771",
+    "channels": [
+        {
+            "name": "1",
+            "actions": [
+                "on",
+                "off"
+            ],
+            "ivrSayType": "NULL"
+        },
+        {
+            "name": "2",
+            "actions": "all",
+            "ivrSayType": "NULL"
+        },
+        {
+            "name": "דלת",
+            "actions": [
+                "delay"
+            ],
+            "ivrSayType": "TTS"
+        },
+        {
+            "name": "4",
+            "actions": "all",
+            "ivrSayType": "TTS"
+        },
+        {
+            "name": "5",
+            "actions": [
+                "on",
+                "off"
+            ],
+            "ivrSayType": "TTS"
+        },
+        {
+            "name": "6",
+            "actions": [
+                "on",
+                "off"
+            ],
+            "ivrSayType": "TTS"
+        },
+        {
+            "name": "7",
+            "actions": "all",
+            "ivrSayType": "NULL"
+        },
+        {
+            "name": "8",
+            "actions": [],
+            "ivrSayType": "NULL"
+        }
+    ]
+}
