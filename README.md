@@ -41,29 +41,33 @@ type=hangup
 בפניה לממש האינטרנטי יש לצרף את הערך "systemCode" עם הסיסמה.
 לדוגמא: https://example.com/?systemCode=MyCode
 
-<div dir='rtl' align='right'>
-
 ## הפעלה:
 
+ 
 ### דוקר:
-על ידי דוקר:
 
-יש לעדכן את הפורטים לחשיפה ב runme.sh
+יש לעדכן לפני הפעלה את הפורטים לחשיפה ב runme.sh
+  
 </div>
 
 ```
 ./buildme.sh ;./runme.sh
 ```
+  
 
 <div dir='rtl' align='right'>
+  
 ### הפעלה רגילה:
+  
 </div>
+  
 ```
 npm install
 npm start
 ```
 
 <div dir='rtl' align='right'>
+  
 ## תמונות מסך
 
   ![image](https://user-images.githubusercontent.com/60587313/138574648-a73f75a6-d4cd-4a88-a243-ebe2067797cf.png)
