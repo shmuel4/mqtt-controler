@@ -6,10 +6,33 @@ class IvrConsullerManagement {
 
     constructor(url) {
         this.url = url;
+        this.callsStatus = [];
         this.config = require(path.join(__dirname, '../../channelsList.json'));
     }
 
-    async getStatus() {
+    async getYmRead(ymData, key) {
+        if (this.callsStatus[ymData.ApiCallId][key] == undefined) {
+            this.callsStatus[ymData.ApiCallId][key] = 0;
+            return 0;
+        } else {
+            this.callsStatus[ymData.ApiCallId][key]++;
+            return this.callsStatus[ymData.ApiCallId][key];
+        }
+    }
+
+    async getYmReadRequired(ymData, key) {
+        if (this.callsStatus[ymData.ApiCallId] == undefined) {
+            this.callsStatus[ymData.ApiCallId] = [];
+        }
+
+        if (this.callsStatus[ymData.ApiCallId][key] == undefined) {
+            return `${key}0`;
+        }
+
+        return `${key}${this.callsStatus[ymData.ApiCallId][key]}`;
+    }
+
+    async getStatus(ymData) {
         try {
             var status = await axios.get(this.url + 'relay_cgi_load.cgi');
             status = status.data.split("&");
@@ -24,17 +47,17 @@ class IvrConsullerManagement {
                     case 'NULL':
                         continue;
                     case 'TTS':
-                        ymAnswer += `f-YM_LOCAL/mqtt/chanelNumber.t-${this.config.channels[i - 3].name}.f-YM_LOCAL/mqtt/${status[i] == 1 ? 'on' : "off"}.`;
+                        ymAnswer += `f-YM_LOCAL/mqtt/chanelNumber.d-${i - 2}.t-${this.config.channels[i - 3].name}.f-YM_LOCAL/mqtt/${status[i] == 1 ? 'on' : "off"}.`;
                         break;
                     case 'FILE':
-                        ymAnswer += `f-YM_LOCAL/mqtt/chanelNumber.f-${this.config.channels[i - 3].ivrSayFileLocation}.f-YM_LOCAL/mqtt/${status[i] == 1 ? 'on' : "off"}.`;
+                        ymAnswer += `f-YM_LOCAL/mqtt/chanelNumber.d-${i - 2}.f-${this.config.channels[i - 3].ivrSayFileLocation}.f-YM_LOCAL/mqtt/${status[i] == 1 ? 'on' : "off"}.`;
                         break
                     default:
                         ymAnswer += `f-YM_LOCAL/mqtt/chanelNumber.d-${i - 2}.f-YM_LOCAL/mqtt/${status[i] == 1 ? 'on' : "off"}.`;
                 }
             }
 
-            ymAnswer += `f-YM_LOCAL/mqtt/menu=AC,yes,1,1,7,No,no,no,*/`
+            ymAnswer += `f-YM_LOCAL/mqtt/menu=AC${await this.getYmRead(ymData, 'AC')},yes,1,1,7,No,no,no,*/`
 
             return ymAnswer;
         } catch (err) {
@@ -46,7 +69,6 @@ class IvrConsullerManagement {
     async onChip(Number) {
         try {
             axios.get(this.url + `relay_cgi.cgi?type=0&relay=${Number - 1}&on=1&time=0&pwd=${process.env.MQTT_PASS}&`).then(function(response) {
-                console.log('end Api');
                 console.log(response.data);
             });
 
@@ -62,7 +84,6 @@ class IvrConsullerManagement {
     async offChip(Number) {
         try {
             axios.get(this.url + `relay_cgi.cgi?type=0&relay=${Number - 1}&on=0&time=0&pwd=${process.env.MQTT_PASS}&`).then(function(response) {
-                console.log('end Api');
                 console.log(response.data);
             });
 
@@ -78,7 +99,6 @@ class IvrConsullerManagement {
     async delayChip(Number) {
         try {
             axios.get(this.url + `relay_cgi.cgi?type=2&relay=${Number - 1}=1&on=1&time=5&pwd=${process.env.MQTT_PASS}&`).then(function(response) {
-                console.log('end Api');
                 console.log(response.data);
             });
 

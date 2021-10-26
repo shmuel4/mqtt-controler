@@ -5,41 +5,40 @@ dotenv.config();
 const axios = require('axios');
 const path = require('path');
 const consuller = require(path.join(__dirname, 'consuller.js'));
-
 let cn = new consuller(process.env.MQTT_URL);
 
 router.get('/', async(req, res) => {
-    ymData = req.query;
+    let ymData = req.query;
     //console.log(typeof ymData.AC)
-    if (ymData.AC == undefined) {
+    if (ymData[await cn.getYmReadRequired(ymData, 'AC')] == undefined) {
         // אם ריק מחזיר סטטוס
-        res.send(await cn.getStatus());
-    } else if (ymData.AC == 1 && ymData.Number == undefined) {
-        res.send('read=f-YM_LOCAL/mqtt/selectOn=Number,no,1,1,7,No,yes,no,*/');
-    } else if (ymData.AC == 1 && ymData.Number != undefined) {
-        if (await cn.checkButtonAvailabilityOnIVR(ymData.Number - 1, 'on')) {
-            res.send(await cn.onChip(ymData.Number));
+        res.send(await cn.getStatus(ymData));
+    } else if (ymData[await cn.getYmReadRequired(ymData, 'AC')] == 1 && ymData[await cn.getYmReadRequired(ymData, 'Number')] == undefined) {
+        res.send(`read=f-YM_LOCAL/mqtt/selectOn=Number${await cn.getYmRead(ymData, 'Number')},no,1,1,7,No,yes,no,*/`);
+    } else if (ymData[await cn.getYmReadRequired(ymData, 'AC')] == 1 && ymData[await cn.getYmReadRequired(ymData, 'Number')] != undefined) {
+        if (await cn.checkButtonAvailabilityOnIVR(ymData[await cn.getYmReadRequired(ymData, 'Number')] - 1, 'on')) {
+            res.send(await cn.onChip(ymData[await cn.getYmReadRequired(ymData, 'Number')]));
         } else {
             res.send("id_list_message=f-YM_LOCAL/mqtt/NotAllowAction&go_to_folder=/0");
         }
-    } else if (ymData.AC == 2 && ymData.Number == undefined) {
-        res.send('read=f-YM_LOCAL/mqtt/selectOff=Number,no,1,1,7,No,yes,no,*/');
-    } else if (ymData.AC == 2 && ymData.Number != undefined) {
-        if (await cn.checkButtonAvailabilityOnIVR(ymData.Number - 1, 'off')) {
-            res.send(await cn.offChip(ymData.Number));
+    } else if (ymData[await cn.getYmReadRequired(ymData, 'AC')] == 2 && ymData[await cn.getYmReadRequired(ymData, 'Number')] == undefined) {
+        res.send(`read=f-YM_LOCAL/mqtt/selectOff=Number${await cn.getYmRead(ymData, 'Number')},no,1,1,7,No,yes,no,*/`);
+    } else if (ymData[await cn.getYmReadRequired(ymData, 'AC')] == 2 && ymData[await cn.getYmReadRequired(ymData, 'Number')] != undefined) {
+        if (await cn.checkButtonAvailabilityOnIVR(ymData[await cn.getYmReadRequired(ymData, 'Number')] - 1, 'off')) {
+            res.send(await cn.offChip(ymData[await cn.getYmReadRequired(ymData, 'Number')]));
         } else {
             res.send("id_list_message=f-YM_LOCAL/mqtt/NotAllowAction&go_to_folder=/0");
         }
-    } else if (ymData.AC == 3 && ymData.Number == undefined) {
-        res.send('read=f-YM_LOCAL/mqtt/selectDelay=Number,no,1,1,7,No,yes,no,*/');
-    } else if (ymData.AC == 3 && ymData.Number != undefined) {
-        if (await cn.checkButtonAvailabilityOnIVR(ymData.Number - 1, 'delay')) {
-            res.send(await cn.delayChip(ymData.Number));
+    } else if (ymData[await cn.getYmReadRequired(ymData, 'AC')] == 3 && ymData[await cn.getYmReadRequired(ymData, 'Number')] == undefined) {
+        res.send(`read=f-YM_LOCAL/mqtt/selectDelay=Number${await cn.getYmRead(ymData, 'Number')},no,1,1,7,No,yes,no,*/`);
+    } else if (ymData[await cn.getYmReadRequired(ymData, 'AC')] == 3 && ymData[await cn.getYmReadRequired(ymData, 'Number')] != undefined) {
+        if (await cn.checkButtonAvailabilityOnIVR(ymData[await cn.getYmReadRequired(ymData, 'Number')] - 1, 'delay')) {
+            res.send(await cn.delayChip(ymData[await cn.getYmReadRequired(ymData, 'Number')]));
         } else {
             res.send("id_list_message=f-YM_LOCAL/mqtt/NotAllowAction&go_to_folder=/0");
         }
     } else {
-        res.send('ERROR');
+        res.send(await cn.getStatus(ymData));
     }
 });
 
